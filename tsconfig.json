@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "lib": ["es6", "DOM"],
+    "types": ["reflect-metadata", "mocha"],
+    "outDir": "dist",
+    "sourceMap": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
+    // "plugins": [
+    //   { "transform": "ts-auto-mock/transformer" }
+    // ]
+  },
+  "files": [
+    "./node_modules/@types/mocha/index.d.ts",
+    "./node_modules/@types/node/index.d.ts",
+  ],
+  "include": [
+    "src/**/*.ts",
+    // "tests/**/*.ts",
+    // "unit-tests/**/*.ts",
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
