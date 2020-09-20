@@ -16,7 +16,8 @@ export default abstract class Controller {
     responseSent = false;
     logRequest = true;
 
-    requiresAuthentication = true;
+    // TODO::Change to True once ready
+    requiresAuthentication = false;
 
     @inject(TYPES.Logger) logger: Logger;
     @inject(TYPES.MetricCollector) metricCollector: MetricCollectorInterface;

@@ -106,7 +106,8 @@ export class PrometheusMetricCollector implements MetricCollectorInterface {
           this.histograms.set(name, new PromClient.Histogram({
                name,
                labelNames: tags,
-               help: description ?? name
+               help: description ?? name,
+               buckets: [1, 50, 100, 250, 500, 700]
           }));
      }
      

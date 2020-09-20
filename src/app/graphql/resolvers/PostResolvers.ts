@@ -63,7 +63,7 @@ export class CreatePostReolver extends Resolver {
             });
 
             return {
-                ref,
+                ref: JSON.parse(ref)._id,
                 name: filename,
                 type: mimetype
             };

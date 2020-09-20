@@ -27,7 +27,7 @@ export class GraphQL extends Middleware {
      * @returns Context
      */
     context = ({ req }) => {
-        this.logger.debug("Building context", {auth: req.auth, operation: req.body})
+        // this.logger.debug("Building context", {auth: req.auth, operation: req.body})
         if ( req.auth ) {
             return { auth: req.auth };
         }

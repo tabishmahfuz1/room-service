@@ -10,7 +10,7 @@ export interface IPost {
 }
 
 export interface FileType {
-    ref?: string;
+    fileId?: string;
     name: string;
     type: string;
 }

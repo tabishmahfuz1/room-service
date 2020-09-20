@@ -12,7 +12,7 @@ const PostSchema = new Schema({
         required: true
     },
     attachments: [{
-        ref: {type: String, required: true},
+        fileId: {type: String, required: true},
         name: {type: String, required: true},
         type: {type: String}
     }],

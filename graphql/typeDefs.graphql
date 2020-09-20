@@ -8,7 +8,7 @@ type Query {
 type Mutation {
     createRoom(inp: CreateRoomInput!): Room!
     updateRoom(inp: UpdateRoomInput!): Room!
-    saveTasks(roomId: ID!, task: [TaskItemInput!]!): [Task!]!
+    saveTasks(roomId: ID!, task: [TaskInput!]!): [Task!]!
     addMember(roomId: ID!, member: String!): Room!
     removeMember(roomId: ID!, member: String!): Room!
     joinRoom(roomCode: String!): Room!
@@ -54,6 +54,7 @@ type Post {
 
 type File {
     id: ID!
+    fileId: String!
     name: String!
     file: String!
 }

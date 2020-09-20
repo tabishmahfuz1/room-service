@@ -87,8 +87,10 @@ export class RemoteFileRepository implements IFileRepository {
         }) */
     }
 
-    getById(id: string): Promise<Readable> {
-        throw new Error("Method not implemented.");
+    async getById(id: string): Promise<Readable> {
+        return got.get(`${this.fileRepoUrl}/get/${id}`, {
+            isStream: true
+        });
     }
     
     find(filters: Partial<FileFilters>): IFile[] {

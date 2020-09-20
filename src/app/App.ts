@@ -17,6 +17,7 @@ import { MetricCollectorInterface } from './providers/MetricsProvider';
 import { Registerable } from './Registerable';
 import { Cors } from './middlewares/Cors';
 import BasePathRoutes from './routes/BasePathRoutes';
+import V1APIRoutes from './routes/V1APIRoutes';
 
 @injectable()
 export class App {
@@ -42,7 +43,8 @@ export class App {
 	 * @property Routes[]
 	 */
 	private routes: Routes[] = [
-		container.get<Routes>(BasePathRoutes)
+		container.get<Routes>(BasePathRoutes),
+		container.get<Routes>(V1APIRoutes)
 	];
 
 	/**
