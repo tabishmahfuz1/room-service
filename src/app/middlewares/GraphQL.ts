@@ -29,7 +29,10 @@ export class GraphQL extends Middleware {
     context = ({ req }) => {
         // this.logger.debug("Building context", {auth: req.auth, operation: req.body})
         if ( req.auth ) {
-            return { auth: req.auth };
+            return { auth: {
+                userId: req.auth.email || req.auth.phone,
+                permissions: req.auth.permissions
+            }};
         }
     }
 

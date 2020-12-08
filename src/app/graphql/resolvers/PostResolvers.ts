@@ -9,6 +9,7 @@ import { UserInputError } from "apollo-server-express";
 import { container } from "../../inversify.config";
 import { createWriteStream } from "fs";
 import { RoomRepository } from "../../database/repositories/RoomRepository";
+import { IDocumentParser } from "../../providers/DocumentParser";
 
 interface PostInput {
     type: string;
@@ -37,19 +38,30 @@ export class CreatePostReolver extends Resolver {
 
     constructor(
         @inject(TYPES.PostRepository) private _postRepo: PostRepository,
-        @inject(TYPES.FileRepository) private _fileRepo: IFileRepository
+        @inject(TYPES.FileRepository) private _fileRepo: IFileRepository,
+        @inject(TYPES.DocumentParser) private _documentParser: IDocumentParser
     ){
         super();
     }
 
     async handle(parent: any, { post }: { post: PostInput }, context: any) {
-        this.logger.debug("PARAMS", post);
+        this.logger.debug("PARAMS", {post, auth: this.auth()});
         if ( post.parentPost ) {
             const parentPost = await this._postRepo.findById(post.parentPost);
             if ( !parentPost ) 
                 throw new UserInputError("Invalid Parent Post ID");
         }
 
+        const promises = post.attachments.map(async(attachment) => {
+            const { filename, mimetype, createReadStream } = await attachment;
+            const labels = await this._documentParser.labels(filename, createReadStream());
+            post.labels = post.labels.concat(labels);
+        });
+
+        await Promise.all(promises);
+
+        post.labels = post.labels?.map(l => l.toLowerCase());
+        this.logger.debug("Labels for Post", post.labels);
         const files = post.attachments.map(async(attachment) => {
             const { filename, mimetype, createReadStream } = await attachment;
             this.logger.debug("File Read", filename);
@@ -63,17 +75,21 @@ export class CreatePostReolver extends Resolver {
             });
 
             return {
-                ref: JSON.parse(ref)._id,
+                fileId: ref.response._id,
                 name: filename,
                 type: mimetype
             };
         });
 
-        return this._postRepo.create({
+        const postToCreate = {
             ...post,
             createdBy: this.auth().userId,
             attachments: await Promise.all(files)
-        });
+        };
+
+        this.logger.debug("To create", postToCreate)
+
+        return this._postRepo.create(postToCreate);
     }
 }
 
@@ -92,8 +108,10 @@ export class PostsQueryResolver extends Resolver {
         super();
     }
 
-    handle({ postFilterInput }: { postFilterInput: any }) {
-        return this._postRepo.find(postFilterInput);
+    handle(_, { inp }: { inp: any }) {
+        if ( inp.labels )
+            inp.labels = inp.labels?.map(l => l.toLowerCase());
+        return this._postRepo.find(inp);
     }
 }
 

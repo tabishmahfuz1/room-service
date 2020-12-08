@@ -23,6 +23,7 @@ export default class DotEnvConfig extends Config {
 			appName: process.env.APP_NAME || 'TSApp',
 			nodeENV: process.env.NODE_ENV || "development",
 			fileRepoUrl: process.env.FILE_REPO_URL,
+			DOCUMENT_PARSER_URL: process.env.DOCUMENT_PARSER_URL,
 			postTypes: process.env.POST_TYPES? process.env.POST_TYPES.split(',') : ['default']
         };
     }

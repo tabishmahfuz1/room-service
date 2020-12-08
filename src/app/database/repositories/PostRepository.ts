@@ -23,6 +23,8 @@ export class MongoosePostRepository implements PostRepository {
     
     
     find(filters?: any, fields?: any, populateRelations?:boolean): Promise<IPostModel[]> {
+        const { labels } = filters;
+        if(labels) filters.labels = { $all: labels };
         let query = PostModel.find(filters || {})
 
         if( fields ) {

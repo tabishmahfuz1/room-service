@@ -8,6 +8,7 @@ const TYPES = {
     MetricCollector: Symbol.for("MetricCollector"),
     DateFormat: Symbol.for("DateFormat"),
     CodeGenerator: Symbol.for("CodeGenerator"),
+    DocumentParser: Symbol.for("DocumentParser"),
 
     /**
      * Repositories

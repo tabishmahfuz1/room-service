@@ -19,6 +19,7 @@ import { ICodeGenerator, CryptoCodeGenerator } from "./providers/CodeGenrator";
 import { toPairs } from "lodash";
 import { IFileRepository, RemoteFileRepository } from "./providers/FileRepository";
 import { TaskRepository, MongooseTaskRepository } from "./database/repositories/TaskRepository";
+import { DocumentParser, IDocumentParser } from "./providers/DocumentParser";
 
 const container = new Container({ autoBindInjectable: true });
 
@@ -31,6 +32,7 @@ container.bind<Schema>(TYPES.Schema).to(AppSchema).inSingletonScope();
 container.bind<MetricCollectorInterface>(TYPES.MetricCollector).to(PrometheusMetricCollector).inSingletonScope();
 container.bind<ReadyStatusObserver>(ReadyStatusObserver).toSelf().inSingletonScope();
 container.bind<ICodeGenerator>(TYPES.CodeGenerator).to(CryptoCodeGenerator).inSingletonScope();
+container.bind<IDocumentParser>(TYPES.DocumentParser).to(DocumentParser).inSingletonScope();
 
 /**
  * Repositories

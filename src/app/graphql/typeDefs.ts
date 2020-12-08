@@ -13,4 +13,4 @@ const typeDefs = readFileSync(path.join(__dirname, '../../../graphql/typeDefs.gr
 
 // export default `${typeDefs}${_additionalTypes}`;
 
-export const decorateTypeDefs = (typeDefs: string, additionalTypes: Array<string>) => `${typeDefs}\nenum PostType {\n\t${additionalTypes.reduce((str, type) => `${str}\n\t${type}`, '')}\n}`;
+export const decorateTypeDefs = (typeDefs: string, additionalTypes: Array<string>) => `${typeDefs}\nenum PostType {\n\t${[...additionalTypes, "Default"].reduce((str, type) => `${str}\n\t${type}`, '')}\n}`;

@@ -5,7 +5,7 @@ import { TYPES } from "../types";
 import Config from "./config/Config";
 import { Logger } from "../Log";
 import got from 'got';
-import { createReadStream, createWriteStream, exists, mkdir, unlink } from "fs";
+import { createReadStream, createWriteStream, readFileSync, exists, mkdir, unlink } from "fs";
 import { promisify } from "util";
 const dirExists = promisify(exists);
 const mkDir = promisify(mkdir);
@@ -27,7 +27,7 @@ interface FileFilters {
 }
 
 export interface IFileRepository {
-    store(file: IFile): Promise<string>;
+    store(file: IFile): Promise<any>;
     getById(id: string): Promise<Readable>;
     find(filters: Partial<FileFilters>): Array<IFile>;
 } 
@@ -49,8 +49,9 @@ export class RemoteFileRepository implements IFileRepository {
         this.fileRepoUrl = fileRepoUrl;
     }
 
-    async store(file: IFile): Promise<string> {
+    async store(file: IFile): Promise<any> {
         // throw new Error("Method not implemented.");
+        
         const postData = new FormData();
         postData.append('name', (file.name));
         postData.append('labels', (JSON.stringify(file.labels)));
@@ -58,33 +59,41 @@ export class RemoteFileRepository implements IFileRepository {
         file.mimetype && postData.append('mimetype', (file.mimetype));
 
         const tmpFileName = `tmp/${(new Date()).getTime()}-${file.name}`;
+        return new Promise((resolve, reject) => {
+            file.createReadStream().pipe(createWriteStream(tmpFileName)).on('finish', () => {
+                postData.append('file', createReadStream(tmpFileName));
+                // console.log("POST DATA", postData);
+                // console.log("STREAM",  file.createReadStream);
+                // throw new Error();
+                // return got.post(`${this.fileRepoUrl}/upload`, {
+                //     body: postData
+                // }).text().then(text => {
+                //     unlink(tmpFileName, (err) => {
+                //         if(err) this._logger.error("Coudn't delete tmp file", err);
+                //         else this._logger.debug("Temp file deleted", tmpFileName);
+                //     });
+                //     // console.log("Returning from Repo", text);
+                //     return JSON.parse(text);
+                // });
 
-        file.createReadStream().pipe(createWriteStream(tmpFileName))
-        postData.append('file', createReadStream(tmpFileName));
-        console.log("POST DATA", postData);
-        // console.log("STREAM",  file.createReadStream);
-        // throw new Error();
-        return got.post(`${this.fileRepoUrl}/upload`, {
-            body: postData
-        }).text().then(text => {
-            unlink(tmpFileName, (err) => {
-                if(err) this._logger.error("Coudn't delete tmp file", err);
-                else this._logger.debug("Temp file deleted", tmpFileName);
-            });
-            return text;
-        });
+                
 
-        /* return new Promise((resolve, reject) => {
+                postData.submit(`${this.fileRepoUrl}/upload`, (err, res) => {
+                    if ( err ) return reject(err);
 
-            postData.submit(`${this.fileRepoUrl}/upload`, (err, res) => {
-                if ( err ) return reject(err);
-
-                res.on('data', data => {
-                    this._logger.debug("Data from File Repo", data);
-                    resolve(data);
+                    res.on('data', data => {
+                        const d = JSON.parse(data.toString());
+                        console.log("data", d); 
+                        if ( d.status == 'error' ) {
+                            reject(d.error);
+                            return;
+                        }
+                        // this._logger.debug("Data from File Repo", data);
+                        resolve(d);
+                    })
                 })
             })
-        }) */
+        });
     }
 
     async getById(id: string): Promise<Readable> {

@@ -108,19 +108,20 @@ export class JoinRoomResolver extends Resolver {
     async handle(parent: any, { roomCode }: { roomCode: string }, context: any) {
 
         const { userId } = this.auth();
+        this.logger.debug("User ID", userId);
         const room = await this._roomRepo.findOne({ code: roomCode });
 
         if ( !room ) {
             throw new UserInputError("Invalid Room Code");
         }
 
-        const user = await this._userRepo.findOne({ userId });
+        // const user = (await this._userRepo.findOne({ userId })) || (await this._userRepo.create({ userId }));
 
-        if ( !user ) {
-            throw new UserInputError("Invalid User ID");
-        }
+        // if ( !user ) {
+            // throw new UserInputError("Invalid User ID");   
+        // }
 
-        return addUserToRoom(room, user);
+        return addUserToRoom(room, userId);
     }
 }
 
@@ -151,22 +152,22 @@ export class AddMemberResolver extends Resolver {
             throw new UserInputError("Invalid Room ID");
         }
 
-        const user = await this._userRepo.findOne({ userId });
+        // const user = await this._userRepo.findOne({ userId });
 
-        if ( !user ) {
-            throw new UserInputError("Invalid User ID");
-        }
+        // if ( !user ) {
+        //     throw new UserInputError("Invalid User ID");
+        // }
 
-        return addUserToRoom(room, user);
+        return addUserToRoom(room, userId);
     }
 }
 
-const addUserToRoom = async (room: IRoomModel, user: IUserModel) => {
+const addUserToRoom = async (room: IRoomModel, userId: string) => {
     // Add Room to User
-    user.rooms.push(room.id);        
+    // user.rooms.push(room.id);        
     // Add User to Room
-    room.members.push(user.id);
-    await user.save();
+    room.members.push(userId);
+    // await user.save();
     return room.save();
 } 
 
@@ -225,7 +226,8 @@ export class RoomsQuery extends Resolver {
     }
 
     handle(parent: any, { inp }: any, context: any) {
-        return this._roomRepo.find(inp);
+        const { userId } = this.auth();
+        return this._roomRepo.find({...inp, members: userId });
     }
 
 }
@@ -312,6 +314,7 @@ export const getAsArray: () => Resolver[] = () => {
         container.get(RoomsQuery),
         container.get(RoomPostsResolver),
         container.get(AddMemberResolver),
+        container.get(JoinRoomResolver),
         container.get(RoomTasksResolver),
         container.get(SaveTasksResolver),
     ];

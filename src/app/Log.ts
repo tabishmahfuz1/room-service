@@ -67,15 +67,15 @@ export class STDOutLogger implements Logger {
     }
 
     info(str: string, data?: any) {
-        console.log('[INFO]\t', str, data || '');
+        console.log('[INFO]\t', str, JSON.stringify(data) || '');
     }
 
     debug(str: string, data?: any) {
-        this.config.get("nodeENV") === "development" && console.log('[DEBUG]\t', str, data || '');
+        this.config.get("nodeENV") === "development" && console.log('[DEBUG]\t', str, JSON.stringify(data) || '');
     }
 
     error(str: string, data?: any) {
-        console.error('[ERROR]\t', str, data || '');
+        console.error('[ERROR]\t', str, JSON.stringify(data) || '');
     }
 }
 

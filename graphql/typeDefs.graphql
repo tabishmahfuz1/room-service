@@ -56,7 +56,7 @@ type File {
     id: ID!
     fileId: String!
     name: String!
-    file: String!
+    type: String
 }
 
 input CreateRoomInput {
@@ -82,6 +82,7 @@ input PostFilterInput {
     id: ID
     type: PostType
     text: String
+    labels: [String]
     room: String
     parentPost: ID
     createdBy: String

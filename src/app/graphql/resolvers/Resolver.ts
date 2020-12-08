@@ -19,7 +19,7 @@ export default abstract class Resolver {
     /**
      * @var boolean Indicates if the Resolver should be Authenticated
      */
-    isAuthenticatedResolver: boolean = false;
+    isAuthenticatedResolver: boolean = true;
     
     context: Context;
 
@@ -78,7 +78,7 @@ export default abstract class Resolver {
         } catch( err ) {
             this.metricRecorder.incrementCounter('errors', {
                 path:`${this.type()}.${this.key()}`,
-                name: err.name
+                name: err?.name
             });
             
             this.logger.error(`Error in ${this.type()}.${this.key()}`, {
@@ -97,7 +97,7 @@ export default abstract class Resolver {
      * @returns boolean
      */
     protected hasPermission(permission: string): boolean {
-        return this.context.auth.permissions
+        return this.context.auth.permissions && this.context.auth.permissions
                 .some(userPermission => userPermission == permission || userPermission == Permissions.Admin)
     }
 
@@ -127,7 +127,7 @@ export default abstract class Resolver {
     }
 
     auth() {
-        return process.env.NODE_ENV == 'development'? { userId: "dev" } : this.context.auth;
+        return this.context.auth;
     }
 
     /**

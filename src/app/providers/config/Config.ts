@@ -7,6 +7,7 @@ export interface IConfigObject {
 	publicKeyPath: string,
 	logFilePath?: string,
 	fileRepoUrl: string,
+	DOCUMENT_PARSER_URL: string,
 	appName: string,
 	nodeENV: string,
 	postTypes: string[] // Comma Separated Values
