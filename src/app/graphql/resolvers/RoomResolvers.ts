@@ -15,6 +15,7 @@ import { TaskRepository } from "../../database/repositories/TaskRepository";
 
 interface CreateRoomInput {
     name: string;
+    blacklistedLabels?: string[];
     members?: string[];
 }
 
@@ -51,7 +52,14 @@ export class CreateRoomResolver extends Resolver {
 
         const members = [createdBy, ...(inp.members || [])];
 
-        const input = {...inp, code, members, createdBy, createdAt: new Date()};
+        const input = {
+            ...inp, 
+            blacklistedLabels: inp.blacklistedLabels? inp.blacklistedLabels.map(b => b.toLowerCase()) : [], 
+            code, 
+            members, 
+            createdBy, 
+            createdAt: new Date()
+        };
         this.logger.debug("Creating Room", input)
         return this._roomRepo.create(input);
     }

@@ -5,7 +5,7 @@ import { TYPES } from "../../types";
 import { PostRepository } from "../../database/repositories/PostRepository";
 import { IFileRepository } from "../../providers/FileRepository";
 import { Readable } from "stream";
-import { UserInputError } from "apollo-server-express";
+import { ApolloError, UserInputError } from "apollo-server-express";
 import { container } from "../../inversify.config";
 import { createWriteStream } from "fs";
 import { RoomRepository } from "../../database/repositories/RoomRepository";
@@ -38,6 +38,7 @@ export class CreatePostReolver extends Resolver {
 
     constructor(
         @inject(TYPES.PostRepository) private _postRepo: PostRepository,
+        @inject(TYPES.RoomRepository) private _roomRepo: RoomRepository,
         @inject(TYPES.FileRepository) private _fileRepo: IFileRepository,
         @inject(TYPES.DocumentParser) private _documentParser: IDocumentParser
     ){
@@ -46,15 +47,31 @@ export class CreatePostReolver extends Resolver {
 
     async handle(parent: any, { post }: { post: PostInput }, context: any) {
         this.logger.debug("PARAMS", {post, auth: this.auth()});
+        const room = await this._roomRepo.findById(post.room);
+        if ( !room )
+            throw new UserInputError("Invalid Room ID");
+            
         if ( post.parentPost ) {
             const parentPost = await this._postRepo.findById(post.parentPost);
             if ( !parentPost ) 
                 throw new UserInputError("Invalid Parent Post ID");
         }
 
+        if ( room.blacklistedLabels.length ) {
+            this.logger.debug("Blacklisted Labels are", room.blacklistedLabels);
+        }
+
         const promises = post.attachments.map(async(attachment) => {
             const { filename, mimetype, createReadStream } = await attachment;
             const labels = await this._documentParser.labels(filename, createReadStream());
+
+            this.logger.debug(`Labels for ${filename}`, labels);
+
+            if ( labels.some(l => room.blacklistedLabels.includes(l.toLocaleLowerCase())) ) {
+                // throw new UserInputError("Blacklisted Labels Found in Document");
+                throw new ApolloError(`Blacklisted Labels Found in File ${filename}`, "BLACKLISTED_LABEL_FOUND");
+            }
+
             post.labels = post.labels.concat(labels);
         });
 

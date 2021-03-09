@@ -16,6 +16,7 @@ const RoomSchema = new Schema({
         required: true
     },
     members: [String],
+    blacklistedLabels: [String],
     createdBy: {
         type: String, 
         required: true

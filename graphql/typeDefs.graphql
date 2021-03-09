@@ -61,6 +61,7 @@ type File {
 
 input CreateRoomInput {
     name: String!
+    blacklistedLabels: [String!]
     members: [String!]
 }
 
